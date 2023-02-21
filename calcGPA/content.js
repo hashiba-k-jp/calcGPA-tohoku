@@ -1,4 +1,4 @@
-GP_SIGN = {
+const GP_SIGN = {
     "ＡＡ" : 4,
     "Ａ" : 3,
     "Ｂ" : 2,
@@ -6,131 +6,102 @@ GP_SIGN = {
     "Ｄ" : 0
 }
 
+function createTd(text, attribute=null, whiteSpace=null){
+    tmp_td = document.createElement("td");
+    tmp_td.innerText = text;
+    tmp_td.setAttribute(attribute[0], attribute[1]);
+    tmp_td.style.whiteSpace = whiteSpace
+    return tmp_td;
+}
+
+function updateGp(semester, gp, credit){
+    if(semester in data === false){
+        data[semester] = {"GP": 0, "credits": 0}
+    }
+    data[semester]["GP"] += GP_SIGN[gp] * credit;
+    data[semester]["credits"] += credit;
+}
+
+const data = {};
+
 window.addEventListener("load",function() {
 
-    grades = document.querySelectorAll("#main > form > div > table > tbody > .column_odd");
-    data = {};
-    total_GP = 0;
-    total_credits = 0;
+    const grades = document.querySelectorAll("#main > form > div > table > tbody > .column_odd");
+    let total_GP = 0;
+    let total_credits = 0;
 
     for(const grade of grades){
+        gp      = grade.querySelector("td:nth-child(6)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
+        credit  = Number(grade.querySelector("td:nth-child(4)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), ""));
+        teacher = grade.querySelector("td:nth-child(2)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
+        year    = grade.querySelector("td:nth-child(7)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
+        half    = grade.querySelector("td:nth-child(8)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
 
-        // GP : grade point
-        gp = grade.querySelector("td:nth-child(6)").innerText.replace(String.fromCodePoint(160), '').replace(String.fromCodePoint(32), '');
-        // credit
-        credit = grade.querySelector("td:nth-child(4)").innerText.replace(String.fromCodePoint(160), '').replace(String.fromCodePoint(32), '');
-        credit = Number(credit)
-
+        if (GP_SIGN[gp] == undefined){continue;}
         total_GP += GP_SIGN[gp] * credit;
-        if (GP_SIGN[gp] == undefined){
-            continue;
-        }
         total_credits += credit;
 
-
-        // teacher
-        teacher = grade.querySelector("td:nth-child(2)").innerText.replace(String.fromCodePoint(160), '');
-
         if(teacher != ""){
-
-            // year
-            year = grade.querySelector("td:nth-child(7)").innerText.replace(String.fromCodePoint(160), '');
-            // first or last half
-            half = grade.querySelector("td:nth-child(8)").innerText.replace(String.fromCodePoint(160), '');
-
-            semester = year + half;
-            if (semester in data === false){
-                data[semester] = {
-                    'GP' : GP_SIGN[gp] * credit,
-                    'credits' : credit
-                }
-            }else{
-                data[semester]['GP'] += GP_SIGN[gp] * credit;
-                data[semester]['credits'] += credit;
-            }
+            semester = year + " " +  half; // semester : <string>
+            updateGp(semester, gp, credit);
+        }else{
+            updateGp("その他", gp, credit);
         }
     }
 
-    var target = document.querySelector("#main > form > div:nth-child(7) > div");
-    var br_element = document.createElement('br');
+    const target = document.querySelector("#main > form > div:nth-child(7) > div");
+
+    // navi
     navi = document.querySelector("#tabnavigation_list").cloneNode(true);;
     navi.querySelector("ul > li").innerText = "GPAを確認する"
 
+    //table-definition
+    const gpa_table = document.createElement("table");
+          gpa_table.classList.add("list");
+          gpa_table.style.setProperty("margin-top", "0px")
+          gpa_table.style.setProperty("margin-left", "20px")
+          gpa_table.style.setProperty("border", "1px solid #777777")
+    const header = document.createElement("tr");
+          header.classList.add("label")
+    const gpa_tbody = document.createElement("tbody");
+    const footer = document.createElement("tr");
+          footer.classList.add("column_even")
 
-    var gpa_table = document.createElement('table');
-    var gpa_tbody = document.createElement('tbody');
-
-
-    var header = document.createElement("tr");
-    header.classList.add("label")
-    var head1 = document.createElement('td');
-    var head2 = document.createElement('td');
-    var head3 = document.createElement('td');
-    head1.innerText = 'セメスター'
-    head2.innerText = 'GPA'
-    head3.innerText = '取得単位数'
-    head1.setAttribute("align", "center");
-    head2.setAttribute("align", "center");
-    head3.setAttribute("align", "center");
-    head1.style.whiteSpace = 'nowrap';
-    head2.style.whiteSpace = 'nowrap';
-    head3.style.whiteSpace = 'nowrap';
-    header.appendChild(head1)
-    header.appendChild(head2)
-    header.appendChild(head3)
+    // table-header
+    for(const i_text of ["セメスター", "GPA", "単位取得数"]){
+        const td = createTd(text=i_text, attribute=["align", "center"], whiteSpace="nowrap")
+        header.appendChild(td)
+    }
     gpa_tbody.append(header)
 
-
-    for(row in data){
-        tmp_tr = document.createElement('tr');
-        semester_GPA = (Math.floor(data[row]['GP']*100 / data[row]['credits'])/100).toFixed(2);
-        td_sms = document.createElement('td');        // SeMeSter
-        td_gpa = document.createElement('td');
-        td_crd = document.createElement('td');
-        td_sms.innerHTML = row
-        td_gpa.innerHTML = semester_GPA
-        td_crd.innerHTML = data[row]['credits']
-        td_sms.setAttribute("align", "center");
-        td_gpa.setAttribute("align", "center");
-        td_crd.setAttribute("align", "center");
-        tmp_tr.appendChild(td_sms);
-        tmp_tr.appendChild(td_gpa);
-        tmp_tr.appendChild(td_crd);
+    // table-body
+    const keys = Object.keys(data).sort();
+    for(const row of keys){
+        tmp_tr = document.createElement("tr");
+        semester_GPA = (Math.floor(data[row]["GP"]*100 / data[row]["credits"])/100).toFixed(2);
+        for(const i_text of [row, semester_GPA, data[row]["credits"]]){
+            const td = createTd(text=i_text, attribute=["align", "center"])
+            tmp_tr.appendChild(td)
+        }
         gpa_tbody.appendChild(tmp_tr);
     }
 
-
-    var footer = document.createElement("tr");
-    footer.classList.add("column_even")
-    var foot1 = document.createElement('td');
-    var foot2 = document.createElement('td');
-    var foot3 = document.createElement('td');
-    foot1.innerText = '通算'
-    foot2.innerText = (Math.floor(total_GP * 100 / total_credits)/100).toFixed(2);
-    foot3.innerText = total_credits
-    foot1.setAttribute("align", "center");
-    foot2.setAttribute("align", "center");
-    foot3.setAttribute("align", "center");
-    foot1.style.whiteSpace = 'nowrap';
-    foot2.style.whiteSpace = 'nowrap';
-    foot3.style.whiteSpace = 'nowrap';
-    footer.appendChild(foot1)
-    footer.appendChild(foot2)
-    footer.appendChild(foot3)
+    // table-footer
+    total_gpa = (Math.floor(total_GP * 100 / total_credits)/100).toFixed(2);
+    for(const i_text of ["通算", total_gpa, total_credits]){
+        const td_foot = createTd(text=i_text, attribute=["align", "center"], whiteSpace="nowrap")
+        footer.append(td_foot)
+    }
     gpa_tbody.append(footer)
 
-
-    gpa_table.classList.add("list");
-    gpa_table.style.setProperty("margin-top", "0px")
-    gpa_table.style.setProperty("margin-left", "20px")
-    gpa_table.style.setProperty("border", "1px solid #777777")
+    // table-overall
     gpa_table.appendChild(gpa_tbody)
 
+    // <br>
+    const br_element = document.createElement("br");
 
     target.before(navi);
     target.before(gpa_table);
     target.before(br_element);
 
 })
-
-//p2_element.before(new_element1);
