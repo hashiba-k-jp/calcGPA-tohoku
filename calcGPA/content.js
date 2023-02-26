@@ -22,10 +22,38 @@ function updateGp(semester, gp, credit){
     data[semester]["credits"] += credit;
 }
 
+// 全角数字を半角数字に変換してくれる関数
+// https://www.yoheim.net/blog.php?q=20191101 より
+function hankaku2Zenkaku(str) {
+    return str.replace(/[０-９]/g, function(s) {
+        return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+    });
+}
+
+// 数字の成績をアルファベットの成績に変換する関数
+function numgrade_to_lettergrade(str) {
+    gradenum = Number(hankaku2Zenkaku(str));
+    if(gradenum < 60){
+        return "Ｄ";
+    }
+    else if(gradenum < 70){
+        return "Ｃ";
+    }
+    else if(gradenum < 80){
+        return "Ｂ";
+    }
+    else if(gradenum < 90){
+        return "Ａ";
+    }
+    else{
+        return "ＡＡ";
+    }
+}
+
 const data = {};
 
 window.addEventListener("load",function() {
-
+    
     const grades = document.querySelectorAll("#main > form > div > table > tbody > .column_odd");
     let total_GP = 0;
     let total_credits = 0;
@@ -37,11 +65,19 @@ window.addEventListener("load",function() {
         year    = grade.querySelector("td:nth-child(7)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
         half    = grade.querySelector("td:nth-child(8)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
 
-        if (GP_SIGN[gp] == undefined){continue;}
+        // 数字で成績が書かれていたらアルファベットの形式に直す
+        if (/[０-９]/.test(gp)){
+            gp = numgrade_to_lettergrade(gp);
+        }
+
+        // 数字でもアルファベットでもなかったら無視
+        if (GP_SIGN[gp] == undefined){
+            continue;
+        }
         total_GP += GP_SIGN[gp] * credit;
         total_credits += credit;
 
-        if(teacher != ""){
+        if (teacher != ""){
             semester = year + " " +  half; // semester : <string>
             updateGp(semester, gp, credit);
         }else{
