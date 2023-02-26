@@ -53,7 +53,7 @@ function numgrade_to_lettergrade(str) {
 const data = {};
 
 window.addEventListener("load",function() {
-    
+
     const grades = document.querySelectorAll("#main > form > div > table > tbody > .column_odd");
     let total_GP = 0;
     let total_credits = 0;
