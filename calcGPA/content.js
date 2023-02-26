@@ -14,12 +14,31 @@ function createTd(text, attribute=null, whiteSpace=null){
     return tmp_td;
 }
 
-function updateGp(semester, gp, credit){
-    if(semester in data === false){
-        data[semester] = {"GP": 0, "credits": 0}
+function updateGp(year, semester, gp, units){
+
+    if(year in data === false){
+        data[year] = {
+            "GP_y"      : 0,
+            "units_y" : 0,
+            "details"   : {}
+        }
     }
-    data[semester]["GP"] += GP_SIGN[gp] * credit;
-    data[semester]["credits"] += credit;
+    let details = data[year]["details"]
+
+    data[year]["GP_y"]      += gp
+    data[year]["units_y"] += units
+
+    if(semester){
+        if(semester in details === false){
+            details[semester] = {
+                "semester"  : semester,
+                "GP_s"      : 0,
+                "units_s" : 0,
+            }
+        }
+        details[semester]["GP_s"]      += gp
+        details[semester]["units_s"] += units
+    }
 }
 
 // 全角数字を半角数字に変換してくれる関数
@@ -52,39 +71,95 @@ function numgrade_to_lettergrade(str) {
 
 const data = {};
 
+/*
+    data = {<year>:<year_data>, <year>:<year_data>, ..., <"その他">:<others>}
+        * <year : num> must be in [2022, 2021, 2020, 2019, etc ...]
+
+        <year_data> = {
+            "GP_y"      : <GP : num>,
+            "units_y" : <units : num>,
+            "details"   : {<semester_data>, ...}
+        }
+
+            <semester_data> = {
+                "semester"  : <semester : str>
+                "GP_s"      : <GP : num>,
+                "units_s" : <units : num>,
+            }
+
+                <semester> must be in ["前期", "後期", "通年", "その他"]
+
+        <others> has the same format as <year_data>,
+*/
+
+
 window.addEventListener("load",function() {
 
+    // -=-=-= calc GPA =-=-=-
     const grades = document.querySelectorAll("#main > form > div > table > tbody > .column_odd");
     let total_GP = 0;
-    let total_credits = 0;
+    let total_units = 0;
 
     for(const grade of grades){
-        gp      = grade.querySelector("td:nth-child(6)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
-        credit  = Number(grade.querySelector("td:nth-child(4)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), ""));
-        teacher = grade.querySelector("td:nth-child(2)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
-        year    = grade.querySelector("td:nth-child(7)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
-        half    = grade.querySelector("td:nth-child(8)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
+        exception_units = false;
 
-        // 数字で成績が書かれていたらアルファベットの形式に直す
-        if (/[０-９]/.test(gp)){
-            gp = numgrade_to_lettergrade(gp);
+        // --- get necessary data
+        gpsign  =        grade.querySelector("td:nth-child(6)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
+        units   = Number(grade.querySelector("td:nth-child(4)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), ""));
+        teacher =        grade.querySelector("td:nth-child(2)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
+        year    =        grade.querySelector("td:nth-child(7)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
+        half    =        grade.querySelector("td:nth-child(8)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
+            // half will be one of ("前期", "前期集中", "後期", "後期集中", "通年", "通年集中", etc...)
+        if(half.match("前期")){
+            semester = "前期"
+        }else if(half.match("後期")){
+            semester = "後期"
+        }else if(half.match("通年")){
+            semester = "通年"
+        }else{
+            semester = "その他"
         }
 
+        // --- check whether the data is valid
+        try{
+            year = Number(year)
+        }catch{
+            // if year is not a number, or can not be transformed to number
+            exception_units = true;
+        }
+        if(!teacher){
+            // if teacher is empty
+            exception_units = true;
+        }
+
+        // --- convert gp_sign to gp
+        // 数字で成績が書かれていたらアルファベットの形式に直す
+        if (/[０-９]/.test(gpsign)){
+            gpsign = numgrade_to_lettergrade(gpsign);
+        }
         // 数字でもアルファベットでもなかったら無視
-        if (GP_SIGN[gp] == undefined){
+        if (GP_SIGN[gpsign] == undefined){
             continue;
         }
-        total_GP += GP_SIGN[gp] * credit;
-        total_credits += credit;
+        gp = GP_SIGN[gpsign] * units
 
-        if (teacher != ""){
-            semester = year + " " +  half; // semester : <string>
-            updateGp(semester, gp, credit);
+        // --- sum for total
+        total_GP += gp;
+        total_units += units;
+
+        // --- sum for each year and semester
+        if(!exception_units){
+            updateGp(year, semester, gp, units);
         }else{
-            updateGp("その他", gp, credit);
+            updateGp("その他", "その他", gp, units);
         }
     }
 
+    // check in console.
+    console.log(data)
+
+
+    // -=-=-= display =-=-=-
     const target = document.querySelector("#main > form > div:nth-child(7) > div");
 
     // navi
@@ -101,9 +176,10 @@ window.addEventListener("load",function() {
           header.classList.add("label")
     const gpa_tbody = document.createElement("tbody");
     const footer = document.createElement("tr");
-          footer.classList.add("column_even")
+          footer.classList.add("label")
 
     // table-header
+    // accordion_btn =
     for(const i_text of ["セメスター", "GPA", "単位取得数"]){
         const td = createTd(text=i_text, attribute=["align", "center"], whiteSpace="nowrap")
         header.appendChild(td)
@@ -111,20 +187,40 @@ window.addEventListener("load",function() {
     gpa_tbody.append(header)
 
     // table-body
-    const keys = Object.keys(data).sort();
-    for(const row of keys){
-        tmp_tr = document.createElement("tr");
-        semester_GPA = (Math.floor(data[row]["GP"]*100 / data[row]["credits"])/100).toFixed(2);
-        for(const i_text of [row, semester_GPA, data[row]["credits"]]){
+    const keys_y = Object.keys(data).sort();
+    for(const data_y of keys_y){
+
+        // year (overall of the semester)
+        let tmp_tr_y = document.createElement("tr");
+        tmp_tr_y.classList.add("column_even")
+        year_GP    = data[data_y]["GP_y"]
+        year_units = data[data_y]["units_y"]
+        year_GPA   = (Math.floor(year_GP*100/year_units)/100).toFixed(2)
+        for(const i_text of [data_y, year_GPA, year_units]){
             const td = createTd(text=i_text, attribute=["align", "center"])
-            tmp_tr.appendChild(td)
+            tmp_tr_y.appendChild(td)
         }
-        gpa_tbody.appendChild(tmp_tr);
+        gpa_tbody.appendChild(tmp_tr_y);
+
+        // semester
+        let keys_s = Object.keys(data[data_y]["details"]).sort();
+        for(const data_s of keys_s){
+            tmp_tr_s = document.createElement("tr");
+            semester_GP    = data[data_y]["details"][data_s]["GP_s"];
+            semester_units = data[data_y]["details"][data_s]["units_s"];
+            semester_GPA   = (Math.floor(semester_GP*100 / semester_units)/100).toFixed(2);
+            for(const i_text of [data_s, semester_GPA, semester_units]){
+                const td = createTd(text=i_text, attribute=["align", "center"])
+                tmp_tr_s.appendChild(td)
+            }
+            gpa_tbody.appendChild(tmp_tr_s);
+
+        }
     }
 
     // table-footer
-    total_gpa = (Math.floor(total_GP * 100 / total_credits)/100).toFixed(2);
-    for(const i_text of ["通算", total_gpa, total_credits]){
+    total_gpa = (Math.floor(total_GP * 100 / total_units)/100).toFixed(2);
+    for(const i_text of ["通算", total_gpa, total_units]){
         const td_foot = createTd(text=i_text, attribute=["align", "center"], whiteSpace="nowrap")
         footer.append(td_foot)
     }
