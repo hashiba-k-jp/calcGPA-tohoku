@@ -68,6 +68,12 @@ function numgrade_to_lettergrade(str) {
     }
 }
 
+function setIdsLabalTd(element, idtext){
+    console.log(element)
+    element.querySelector("label").id = idtext
+    element.querySelector("label > input").id = idtext
+}
+
 const data = {};
 
 /*
@@ -179,8 +185,21 @@ window.addEventListener("load",function() {
     const footer = document.createElement("tr");
           footer.classList.add("label")
 
+    const CHECK_TD = createTd(text=null, attribute=["align", "center"], whiteSpace="nowrap");
+          CHECK_TD.style.setProperty("width", "0")
+          CHECK_TD.style.setProperty("white-space", "nowarp")
+    const CHECK_LB = document.createElement("label")
+    const CHECK_IN = document.createElement("input")
+    CHECK_IN.type = "checkbox"
+    CHECK_IN.setAttribute("align", "center")
+    CHECK_LB.appendChild(CHECK_IN)
+    CHECK_TD.appendChild(CHECK_LB)
+
     // table-header
-    // accordion_btn =
+    let check_td = CHECK_TD.cloneNode(true);
+    setIdsLabalTd(check_td, "overall")
+    header.appendChild(check_td)
+
     for(const i_text of ["セメスター", "GPA", "単位取得数"]){
         const td = createTd(text=i_text, attribute=["align", "center"], whiteSpace="nowrap")
         header.appendChild(td)
@@ -197,6 +216,11 @@ window.addEventListener("load",function() {
         let year_GP    = data[data_y]["GP_y"]
         let year_units = data[data_y]["units_y"]
         let year_GPA   = (Math.floor(year_GP*100/year_units)/100).toFixed(2)
+
+        let check_td = CHECK_TD.cloneNode(true);
+        setIdsLabalTd(check_td, "label" + data_y)
+        tmp_tr_y.appendChild(check_td)
+
         for(const i_text of [data_y, year_GPA, year_units]){
             const td = createTd(text=i_text, attribute=["align", "center"])
             tmp_tr_y.appendChild(td)
@@ -210,7 +234,7 @@ window.addEventListener("load",function() {
             let semester_GP    = data[data_y]["details"][data_s]["GP_s"];
             let semester_units = data[data_y]["details"][data_s]["units_s"];
             let semester_GPA   = (Math.floor(semester_GP*100 / semester_units)/100).toFixed(2);
-            for(const i_text of [data_s, semester_GPA, semester_units]){
+            for(const i_text of ["", data_s, semester_GPA, semester_units]){
                 const td = createTd(text=i_text, attribute=["align", "center"])
                 tmp_tr_s.appendChild(td)
             }
@@ -221,7 +245,7 @@ window.addEventListener("load",function() {
 
     // table-footer
     const total_gpa = (Math.floor(total_GP * 100 / total_units)/100).toFixed(2);
-    for(const i_text of ["通算", total_gpa, total_units]){
+    for(const i_text of ["", "通算", total_gpa, total_units]){
         const td_foot = createTd(text=i_text, attribute=["align", "center"], whiteSpace="nowrap")
         footer.append(td_foot)
     }
