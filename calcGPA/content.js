@@ -23,11 +23,10 @@ function updateGp(year, semester, gp, units){
             "details"   : {}
         }
     }
-    let details = data[year]["details"]
-
     data[year]["GP_y"]      += gp
     data[year]["units_y"] += units
 
+    let details = data[year]["details"]
     if(semester){
         if(semester in details === false){
             details[semester] = {
@@ -51,7 +50,7 @@ function hankaku2Zenkaku(str) {
 
 // 数字の成績をアルファベットの成績に変換する関数
 function numgrade_to_lettergrade(str) {
-    gradenum = Number(hankaku2Zenkaku(str));
+    const gradenum = Number(hankaku2Zenkaku(str));
     if(gradenum < 60){
         return "Ｄ";
     }
@@ -101,15 +100,17 @@ window.addEventListener("load",function() {
     let total_units = 0;
 
     for(const grade of grades){
-        exception_units = false;
+        let exception_units = false;
 
         // --- get necessary data
-        gpsign  =        grade.querySelector("td:nth-child(6)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
-        units   = Number(grade.querySelector("td:nth-child(4)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), ""));
-        teacher =        grade.querySelector("td:nth-child(2)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
-        year    =        grade.querySelector("td:nth-child(7)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
-        half    =        grade.querySelector("td:nth-child(8)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
+        let gpsign  =        grade.querySelector("td:nth-child(6)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
+        let units   = Number(grade.querySelector("td:nth-child(4)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), ""));
+        let teacher =        grade.querySelector("td:nth-child(2)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
+        let year    =        grade.querySelector("td:nth-child(7)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
+        let half    =        grade.querySelector("td:nth-child(8)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
             // half will be one of ("前期", "前期集中", "後期", "後期集中", "通年", "通年集中", etc...)
+
+        let semester = null
         if(half.match("前期")){
             semester = "前期"
         }else if(half.match("後期")){
@@ -141,7 +142,7 @@ window.addEventListener("load",function() {
         if (GP_SIGN[gpsign] == undefined){
             continue;
         }
-        gp = GP_SIGN[gpsign] * units
+        let gp = GP_SIGN[gpsign] * units
 
         // --- sum for total
         total_GP += gp;
@@ -163,8 +164,8 @@ window.addEventListener("load",function() {
     const target = document.querySelector("#main > form > div:nth-child(7) > div");
 
     // navi
-    navi = document.querySelector("#tabnavigation_list").cloneNode(true);;
-    navi.querySelector("ul > li").innerText = "GPAを確認する"
+    const navi = document.querySelector("#tabnavigation_list").cloneNode(true);;
+          navi.querySelector("ul > li").innerText = "GPAを確認する"
 
     //table-definition
     const gpa_table = document.createElement("table");
@@ -192,10 +193,10 @@ window.addEventListener("load",function() {
 
         // year (overall of the semester)
         let tmp_tr_y = document.createElement("tr");
-        tmp_tr_y.classList.add("column_even")
-        year_GP    = data[data_y]["GP_y"]
-        year_units = data[data_y]["units_y"]
-        year_GPA   = (Math.floor(year_GP*100/year_units)/100).toFixed(2)
+            tmp_tr_y.classList.add("column_even")
+        let year_GP    = data[data_y]["GP_y"]
+        let year_units = data[data_y]["units_y"]
+        let year_GPA   = (Math.floor(year_GP*100/year_units)/100).toFixed(2)
         for(const i_text of [data_y, year_GPA, year_units]){
             const td = createTd(text=i_text, attribute=["align", "center"])
             tmp_tr_y.appendChild(td)
@@ -205,10 +206,10 @@ window.addEventListener("load",function() {
         // semester
         let keys_s = Object.keys(data[data_y]["details"]).sort();
         for(const data_s of keys_s){
-            tmp_tr_s = document.createElement("tr");
-            semester_GP    = data[data_y]["details"][data_s]["GP_s"];
-            semester_units = data[data_y]["details"][data_s]["units_s"];
-            semester_GPA   = (Math.floor(semester_GP*100 / semester_units)/100).toFixed(2);
+            let tmp_tr_s = document.createElement("tr");
+            let semester_GP    = data[data_y]["details"][data_s]["GP_s"];
+            let semester_units = data[data_y]["details"][data_s]["units_s"];
+            let semester_GPA   = (Math.floor(semester_GP*100 / semester_units)/100).toFixed(2);
             for(const i_text of [data_s, semester_GPA, semester_units]){
                 const td = createTd(text=i_text, attribute=["align", "center"])
                 tmp_tr_s.appendChild(td)
@@ -219,7 +220,7 @@ window.addEventListener("load",function() {
     }
 
     // table-footer
-    total_gpa = (Math.floor(total_GP * 100 / total_units)/100).toFixed(2);
+    const total_gpa = (Math.floor(total_GP * 100 / total_units)/100).toFixed(2);
     for(const i_text of ["通算", total_gpa, total_units]){
         const td_foot = createTd(text=i_text, attribute=["align", "center"], whiteSpace="nowrap")
         footer.append(td_foot)
