@@ -1,0 +1,29 @@
+.acd_btn {
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.acd_open
+{
+  animation: tr_open 0.3s ease-in 0s;
+  animation-fill-mode: forwards;
+}
+
+
+@keyframes tr_open {
+    0%  {transform: rotate(0);}
+    100%  {transform: rotate(90deg);}
+}
+
+
+.acd_close
+{
+  animation: tr_close 0.3s ease-in 0s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes tr_close {
+    0%  {transform: rotate(90deg);}
+    100%  {transform: rotate(0);}
+}

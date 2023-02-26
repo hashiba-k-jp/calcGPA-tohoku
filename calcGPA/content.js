@@ -94,7 +94,9 @@ const data = {};
 
 window.addEventListener("load",function() {
 
-    // -=-=-= calc GPA =-=-=-
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- Calculate GPA -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     const grades = document.querySelectorAll("#main > form > div > table > tbody > .column_odd");
     let total_GP = 0;
     let total_units = 0;
@@ -160,7 +162,9 @@ window.addEventListener("load",function() {
     console.log(data)
 
 
-    // -=-=-= display =-=-=-
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= display =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     const target = document.querySelector("#main > form > div:nth-child(7) > div");
 
     // navi
@@ -179,9 +183,27 @@ window.addEventListener("load",function() {
     const footer = document.createElement("tr");
           footer.classList.add("label")
 
+    const ACD_TD  = createTd(text=null, attribute=["align", "center"], whiteSpace="nowrap");
+          ACD_TD.style.setProperty("white-space", "nowarp")
+          ACD_TD.classList.add("accordion")
+    const ACD_IMG = document.createElement("img")
+          ACD_IMG.src = chrome.runtime.getURL('images/caret-right-fill.svg');
+    const ACD_BTN = document.createElement("button")
+          ACD_BTN.type = "button"
+          ACD_BTN.value = "FALSE"
+          ACD_BTN.classList.add(".acd_close")
+          ACD_BTN.classList.add("acd_btn") // ACD stands for ACcorDion
+
+    ACD_BTN.appendChild(ACD_IMG)
+    ACD_TD.appendChild(ACD_BTN)
+
     // table-header
-    // accordion_btn =
-    for(const i_text of ["セメスター", "GPA", "単位取得数"]){
+    /*
+    let check_td = ACD_TD.cloneNode(true);
+    header.appendChild(check_td)
+    */
+
+    for(const i_text of ["", "セメスター", "GPA", "単位取得数"]){
         const td = createTd(text=i_text, attribute=["align", "center"], whiteSpace="nowrap")
         header.appendChild(td)
     }
@@ -197,6 +219,11 @@ window.addEventListener("load",function() {
         let year_GP    = data[data_y]["GP_y"]
         let year_units = data[data_y]["units_y"]
         let year_GPA   = (Math.floor(year_GP*100/year_units)/100).toFixed(2)
+
+        let check_td = ACD_TD .cloneNode(true);
+        check_td.querySelector("button").id = "year_" + data_y;
+        tmp_tr_y.appendChild(check_td)
+
         for(const i_text of [data_y, year_GPA, year_units]){
             const td = createTd(text=i_text, attribute=["align", "center"])
             tmp_tr_y.appendChild(td)
@@ -207,10 +234,12 @@ window.addEventListener("load",function() {
         let keys_s = Object.keys(data[data_y]["details"]).sort();
         for(const data_s of keys_s){
             let tmp_tr_s = document.createElement("tr");
+                tmp_tr_s.style.setProperty("display", "none")
+                tmp_tr_s.classList.add("year_" + data_y)
             let semester_GP    = data[data_y]["details"][data_s]["GP_s"];
             let semester_units = data[data_y]["details"][data_s]["units_s"];
             let semester_GPA   = (Math.floor(semester_GP*100 / semester_units)/100).toFixed(2);
-            for(const i_text of [data_s, semester_GPA, semester_units]){
+            for(const i_text of ["", data_s, semester_GPA, semester_units]){
                 const td = createTd(text=i_text, attribute=["align", "center"])
                 tmp_tr_s.appendChild(td)
             }
@@ -221,7 +250,7 @@ window.addEventListener("load",function() {
 
     // table-footer
     const total_gpa = (Math.floor(total_GP * 100 / total_units)/100).toFixed(2);
-    for(const i_text of ["通算", total_gpa, total_units]){
+    for(const i_text of ["", "通算", total_gpa, total_units]){
         const td_foot = createTd(text=i_text, attribute=["align", "center"], whiteSpace="nowrap")
         footer.append(td_foot)
     }
@@ -236,5 +265,32 @@ window.addEventListener("load",function() {
     target.before(navi);
     target.before(gpa_table);
     target.before(br_element);
+
+    for(const btn of document.querySelectorAll(".acd_btn")){
+        // console.log(btn)
+        btn.addEventListener('click', function(){
+            targets_tr = btn.id
+            console.log(targets_tr)
+
+            if(btn.value === "TRUE"){   // To CLOSE
+                btn.classList.add("acd_close")
+                btn.classList.remove("acd_open")
+                btn.value = "FALSE"
+                for(const ele of document.querySelectorAll("." + targets_tr)){
+                    console.log(ele)
+                    ele.style.setProperty("display", "none")
+                }
+
+            }else{                      // To OPEN
+                btn.classList.add("acd_open")
+                btn.classList.remove("acd_close")
+                btn.value = "TRUE"
+                for(const ele of document.querySelectorAll("." + targets_tr)){
+                    console.log(ele)
+                    ele.style.setProperty("display", "")
+                }
+            }
+        });
+    }
 
 })
