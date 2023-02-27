@@ -203,7 +203,7 @@ window.addEventListener("load",function() {
     header.appendChild(check_td)
     */
 
-    for(const i_text of ["", "年度", "　　　　　", "GPA", "単位取得数"]){
+    for(const i_text of ["", "年度", "", "GPA", "単位取得数"]){
         const td = createTd(text=i_text, attribute=["align", "center"], whiteSpace="nowrap")
         header.appendChild(td)
     }
