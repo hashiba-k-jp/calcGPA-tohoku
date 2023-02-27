@@ -6,24 +6,42 @@
 
 .acd_open
 {
-  animation: tr_open 0.3s ease-in 0s;
+  animation: icon_open 0.3s ease-in 0s;
   animation-fill-mode: forwards;
 }
-
-
-@keyframes tr_open {
+@keyframes icon_open {
     0%  {transform: rotate(0);}
     100%  {transform: rotate(90deg);}
 }
 
-
 .acd_close
 {
-  animation: tr_close 0.3s ease-in 0s;
+  animation: icon_close 0.15s ease-in 0s;
   animation-fill-mode: forwards;
 }
-
-@keyframes tr_close {
+@keyframes icon_close {
     0%  {transform: rotate(90deg);}
     100%  {transform: rotate(0);}
+}
+
+.tr_close
+{
+    animation: tr_close 0.15s ease-in 0s;
+    animation-fill-mode: forwards;
+    display: none;
+}
+@keyframes tr_close {
+    0%  {opacity:100;}
+    100%  {opacity:0;}
+}
+
+.tr_open
+{
+    animation: tr_open 0.3s ease-in 0s;
+    animation-fill-mode: forwards;
+    display: ;
+}
+@keyframes tr_open {
+    0%  {opacity:0;}
+    100%  {opacity:100;}
 }
