@@ -12,7 +12,8 @@
     "content_scripts": [
         {
             "matches": [
-                "https://www.srp.tohoku.ac.jp/sa/wssrlstr.do*"
+                "https://www.srp.tohoku.ac.jp/sa/wssrlstr.do*",
+                "https://gkms2.bureau.tohoku.ac.jp/sa/wssrlstr.do*"
             ],
             "js": [
                 "content.js"
