@@ -15,7 +15,6 @@ function createTd(text, attribute=null, whiteSpace=null){
 }
 
 function updateGp(year, semester, gp, units){
-
     if(year in data === false){
         data[year] = {
             "GP_y"      : 0,
@@ -203,7 +202,7 @@ window.addEventListener("load",function() {
     header.appendChild(check_td)
     */
 
-    for(const i_text of ["", "年度", "", "GPA", "単位取得数"]){
+    for(const i_text of ["", "年度", "GPA", "単位取得数"]){
         const td = createTd(text=i_text, attribute=["align", "center"], whiteSpace="nowrap")
         header.appendChild(td)
     }
@@ -224,7 +223,7 @@ window.addEventListener("load",function() {
         check_td.querySelector("button").id = "year_" + data_y;
         tmp_tr_y.appendChild(check_td)
 
-        for(const i_text of [data_y, "", year_GPA, year_units]){
+        for(const i_text of [data_y, year_GPA, year_units]){
             const td = createTd(text=i_text, attribute=["align", "center"])
             tmp_tr_y.appendChild(td)
         }
@@ -239,7 +238,7 @@ window.addEventListener("load",function() {
             let semester_GP    = data[data_y]["details"][data_s]["GP_s"];
             let semester_units = data[data_y]["details"][data_s]["units_s"].toFixed(1);
             let semester_GPA   = (Math.floor(semester_GP*100 / semester_units)/100).toFixed(2);
-            for(const i_text of ["", "", data_s, semester_GPA, semester_units]){
+            for(const i_text of ["", data_s, semester_GPA, semester_units]){
                 const td = createTd(text=i_text, attribute=["align", "center"])
                 tmp_tr_s.appendChild(td)
             }
@@ -250,7 +249,7 @@ window.addEventListener("load",function() {
 
     // table-footer
     const total_gpa = (Math.floor(total_GP * 100 / total_units)/100).toFixed(2);
-    for(const i_text of ["", "通算", "", total_gpa, total_units.toFixed(1)]){
+    for(const i_text of ["", "通算", total_gpa, total_units.toFixed(1)]){
         const td_foot = createTd(text=i_text, attribute=["align", "center"], whiteSpace="nowrap")
         footer.append(td_foot)
     }
