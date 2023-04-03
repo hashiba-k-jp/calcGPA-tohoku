@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Calc GPA",
-    "version": "1.2.1",
+    "version": "1.3.1",
 
     "description": "GPA Calculator for Tohoku University Student Affairs Information System",
     "homepage_url": "https://qiita.com/kekeke-udon/items/bea9145e00597b1a3c5d",
