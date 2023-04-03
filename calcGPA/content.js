@@ -104,11 +104,11 @@ window.addEventListener("load",function() {
         let exception_units = false;
 
         // --- get necessary data
-        let gpsign  =        grade.querySelector("td:nth-child(6)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
-        let units   = Number(grade.querySelector("td:nth-child(4)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), ""));
-        let teacher =        grade.querySelector("td:nth-child(2)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
-        let year    =        grade.querySelector("td:nth-child(7)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
-        let half    =        grade.querySelector("td:nth-child(8)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
+        let gpsign  =        grade.querySelector("td:nth-child(7)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
+        let units   = Number(grade.querySelector("td:nth-child(5)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), ""));
+        let teacher =        grade.querySelector("td:nth-child(3)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
+        let year    =        grade.querySelector("td:nth-child(8)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
+        let half    =        grade.querySelector("td:nth-child(9)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
             // half will be one of ("前期", "前期集中", "後期", "後期集中", "通年", "通年集中", etc...)
 
         let semester = null
