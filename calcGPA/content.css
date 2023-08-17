@@ -46,3 +46,7 @@
     0%  {opacity:0;}
     100%  {opacity:100;}
 }
+
+.invisible_content{
+    display: none;
+}

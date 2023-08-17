@@ -90,12 +90,31 @@ const data = {};
         <others> has the same format as <year_data>,
 */
 
+function change_display(args){
+    toggle_img = document.querySelector("#toggle-"+this.id);
+    if(toggle_img.className == "toggle-visible"){
+        toggle_img.src = chrome.runtime.getURL('images/toggle-off.svg');
+    }else{
+        toggle_img.src = chrome.runtime.getURL('images/toggle-on.svg');
+    }
+    toggle_img.classList.toggle("toggle-visible")
+
+    targets = document.querySelectorAll(".changeble-display-"+this.id);
+    for(t of targets){
+        t.classList.toggle("invisible_content");
+    }
+}
 
 window.addEventListener("load",function() {
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- Calculate GPA -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    const grades_header = document.querySelector("#main > form > div > table > tbody > .label");
+    for(let i = 1; i<=9; i++){
+        grades_header.querySelector("td:nth-child("+String(i)+")").classList.add("changeble-display-"+String(i));
+    }
+
     const grades = document.querySelectorAll("#main > form > div > table > tbody > .column_odd");
     let total_GP = 0;
     let total_units = 0;
@@ -109,7 +128,10 @@ window.addEventListener("load",function() {
         let teacher =        grade.querySelector("td:nth-child(3)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
         let year    =        grade.querySelector("td:nth-child(8)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
         let half    =        grade.querySelector("td:nth-child(9)").innerText.replace(String.fromCodePoint(160), "").replace(String.fromCodePoint(32), "");
-            // half will be one of ("前期", "前期集中", "後期", "後期集中", "通年", "通年集中", etc...)
+        for(let i = 1; i<=9; i++){
+            grade.querySelector("td:nth-child("+String(i)+")").classList.add("changeble-display-"+String(i));
+        }
+        // half will be one of ("前期", "前期集中", "後期", "後期集中", "通年", "通年集中", etc...)
 
         let semester = null
         if(half.match("前期")){
@@ -219,7 +241,7 @@ window.addEventListener("load",function() {
         let year_units = data[data_y]["units_y"].toFixed(1)
         let year_GPA   = (Math.floor(year_GP*100/year_units)/100).toFixed(2)
 
-        let check_td = ACD_TD .cloneNode(true);
+        let check_td = ACD_TD.cloneNode(true);
         check_td.querySelector("button").id = "year_" + data_y;
         tmp_tr_y.appendChild(check_td)
 
@@ -251,6 +273,7 @@ window.addEventListener("load",function() {
     const total_gpa = (Math.floor(total_GP * 100 / total_units)/100).toFixed(2);
     for(const i_text of ["", "通算", total_gpa, total_units.toFixed(1)]){
         const td_foot = createTd(text=i_text, attribute=["align", "center"], whiteSpace="nowrap")
+        td_foot.style.backgroundImage = "none";
         footer.append(td_foot)
     }
     gpa_tbody.append(footer)
@@ -293,5 +316,50 @@ window.addEventListener("load",function() {
             }
         });
     }
+
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- display  settings -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+    const settings_insertion_target = document.querySelector("#side_menu > .mid");
+    const settings_insertion_ul = document.createElement("ul");
+    const settings_insertion_label = document.createElement("li");
+    settings_insertion_label.classList.add("label");
+    settings_insertion_label.innerText = "表示設定"
+    settings_insertion_ul.appendChild(settings_insertion_label);
+
+    const SETTING_IMG_ON  = document.createElement("img")
+          SETTING_IMG_ON.src  = chrome.runtime.getURL('images/toggle-on.svg');
+    const SETTING_IMG_OFF = document.createElement("img")
+          SETTING_IMG_OFF.src = chrome.runtime.getURL('images/toggle-off.svg');
+
+    const settings_insertion_li = document.createElement("li");
+    const settings_insertion_a = document.createElement("a");
+    settings_insertion_a.appendChild(SETTING_IMG_ON);
+    settings_insertion_li.appendChild(settings_insertion_a);
+
+    const display_list = [
+        ["メディア授業科目", 2],
+        ["担当教員", 3],
+        ["必修／選択", 4],
+        ["得点", 6],
+        ["評価", 7]
+    ]
+
+    for(const element of display_list){
+        [tmp_text, tmp_num] = element;
+        let tmp_li = settings_insertion_li.cloneNode(true);
+        tmp_li.classList = "item";
+        tmp_li.querySelector("img").classList = "toggle-visible"
+        tmp_li.querySelector("img").id = "toggle-"+tmp_num
+        tmp_li.querySelector("a").insertAdjacentText('beforeend', tmp_text);
+        tmp_li.querySelector("a").id = tmp_num;
+        tmp_li.querySelector("a").classList = "visible";
+        tmp_li.querySelector("a").addEventListener("click", change_display);
+        settings_insertion_ul.appendChild(tmp_li);
+    }
+
+    settings_insertion_target.appendChild(settings_insertion_ul);
 
 })
